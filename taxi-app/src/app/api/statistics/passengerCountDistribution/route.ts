@@ -24,7 +24,7 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
             throw new Error('Failed to fetch data from QuestDB');
         }
         const data = await response.json();
-        const dataset = data.dataset
+        const dataset = data.dataset.slice(1)
 
         return NextResponse.json(dataset);
 

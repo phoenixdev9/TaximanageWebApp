@@ -5,10 +5,11 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import RideFilter from '@/components/rideFilter/rideFilter';
 import { initialFilterCriteria } from '../../list/page';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, Pie, PieChart, LineChart, Line, RadarChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, Pie, PieChart, LineChart, Line, RadarChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, ComposedChart } from 'recharts';
 import StatisticsService from '@/services/StatisticsService';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner } from '@/components/common/loadingSpinner/loadingSpinner';
+import { scaleSymlog } from 'd3-scale';
 
 interface GraphData {
     name: string,
@@ -21,24 +22,22 @@ const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 export default function Page() {
     const [loading, setLoading] = useState(false);
     const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>(initialFilterCriteria);
-    const [tipPercentageDistribution, setTipPercentageDistribution] = useState<[]>([])
     const [chargeDistribution, setChargeDistribution] = useState([]);
     const [tipPerDistanceDistribution, setTipPerDistanceDistribution] = useState([]);
+    const [tipPercentageDistribution, setTipPercentageDistribution] = useState([]);
     const [paymentTypeDistribution, setPaymentTypeDistribution] = useState([]);
     const router = useRouter()
+    const logScale = scaleSymlog();
 
     useEffect(() => {
-        // const fetchTipPercentageDistribution = async () => {
-        //     try {
-        //         const { data: response, status } = await StatisticsService.getTipPercentageDistribution();
-        //         setTipPercentageDistribution(Object.keys(response).map((key) => ({
-        //             name: key,
-        //             Rides: response[key],
-        //         })))
-        //     } catch (error) {
-        //         if (axios.isAxiosError(error)) console.error(error.message);
-        //     }
-        // };
+        const fetchTipPercentageDistribution = async () => {
+            try {
+                const { data: response, status } = await StatisticsService.getTipPercentageDistribution();
+                setTipPercentageDistribution(response.map(([name, pv]) => ({ name, Rides: pv })))
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
         const fetchChargeDistribution = async () => {
             try {
                 const { data: response, status } = await StatisticsService.getChargeDistribution();
@@ -50,7 +49,7 @@ export default function Page() {
         const fetchTipPerDistanceDistribution = async () => {
             try {
                 const { data: response, status } = await StatisticsService.getTipPerDistanceDistribution();
-                setTipPerDistanceDistribution(response.map(([name, pv]) => ({ name: name.toString(), pv })))
+                setTipPerDistanceDistribution(response.map(([name, pv]) => ({ name: name.toString(), Tip: pv })))
             } catch (error) {
                 if (axios.isAxiosError(error)) console.error(error.message);
             }
@@ -73,7 +72,11 @@ export default function Page() {
         // fetchTipPercentageDistribution();
         // fetchTipPerDistanceDistribution();
         // fetchChargeDistribution();
-        Promise.all([fetchTipPerDistanceDistribution(), fetchChargeDistribution(), fetchPaymentTypeDistribution()]).then(() => setLoading(false))
+        Promise.all([
+            fetchTipPerDistanceDistribution(),
+            fetchChargeDistribution(),
+            fetchPaymentTypeDistribution(),
+            fetchTipPercentageDistribution()]).then(() => setLoading(false))
         // setLoading(false);
     }, []);
 
@@ -141,7 +144,7 @@ export default function Page() {
                 </Tabs>
             </Box>
             <span>Based on 161,843,930 rides</span>
-            <div className='h-full w-full flex flex-row flex-wrap'>
+            <div className='h-full w-full flex flex-row flex-wrap content-start'>
                 {/* <ResponsiveContainer width="50%" height={400}>
                     <ScatterChart
                         margin={{
@@ -189,7 +192,7 @@ export default function Page() {
                         <Radar name="Mike" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
                     </RadarChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="72%" height="40%">
+                {/* <ResponsiveContainer width="72%" height="40%">
                     <LineChart
                         width={500}
                         height={300}
@@ -202,23 +205,65 @@ export default function Page() {
                         }}
                     >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" /*unit={'mi'}*/ />
-                        <YAxis unit={'$'} />
+                        <XAxis dataKey="name" unit={'mi'} />
+                        <YAxis unit={'$'} scale={'sqrt'} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 4 }} dot={{ r: 2 }} />
+                        <Line type="monotone" dataKey="Tip" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
                     </LineChart>
+                </ResponsiveContainer> */}
+                <ResponsiveContainer width="72%" height="40%">
+                    <ScatterChart
+                        width={500}
+                        height={300}
+                        // data={tipPerDistanceDistribution} // Use the formatted data here
+                        margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <Tooltip />
+                        {/* <XAxis dataKey="name" type="number" label={{ value: 'Index', position: 'insideBottomRight', offset: 0 }} />
+                        <YAxis unit="ms" type="number" label={{ value: 'Time', angle: -90, position: 'insideLeft' }} /> */}
+                        <XAxis dataKey="name" unit={'mi'} />
+                        <YAxis dataKey="Tip" unit={'$'} scale={'sqrt'} />
+                        <Legend />
+                        <Scatter name="Tip" data={tipPerDistanceDistribution} fill="#8884d8" radius={1} />
+                        {/* <Line type="monotone" dataKey="Tip" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} /> */}
+                    </ScatterChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="33%" height="25%">
+                <ResponsiveContainer width="33%" height="35%">
                     <PieChart width={300} height={250}>
-                        <Pie data={paymentTypeDistribution} dataKey="percent" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" label={(en) => en.name}>
+                        <Pie data={paymentTypeDistribution} dataKey="percent" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={(en) => en.name}>
                             {paymentTypeDistribution.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        {/* <Legend /> */}
                     </PieChart>
+                </ResponsiveContainer>
+                <ResponsiveContainer width="66%" height="40%">
+                    <LineChart
+                        width={600}
+                        height={300}
+                        data={tipPercentageDistribution} // Use the formatted data here
+                        margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" unit={'%'} scale={logScale} />
+                        <YAxis width={70} scale={'pow'} />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="Rides" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
+                    </LineChart>
                 </ResponsiveContainer>
             </div>
 

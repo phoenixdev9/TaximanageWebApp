@@ -10,6 +10,7 @@ import StatisticsService from '@/services/StatisticsService';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner } from '@/components/common/loadingSpinner/loadingSpinner';
+import { scaleSymlog } from 'd3-scale';
 
 interface GraphData {
     name: string,
@@ -26,12 +27,15 @@ export default function Page() {
     const [hourlyData, setHourlyData] = useState<GraphData[]>([])
     const [monthlyData, setMonthlyData] = useState<GraphData[]>([])
     const [dailyData, setDailyData] = useState<GraphData[]>([])
+    const [tripTimeDistribution, setTripTimeDistribution] = useState([]);
+
     const router = useRouter()
 
     function convertHour(hourKey: string): string {
         const hourOfDay = parseInt(hourKey);
         return `${hourOfDay.toString().padStart(2, '0')}:00`;
     }
+    const logScale = scaleSymlog();
 
     useEffect(() => {
         const fetchTimeSeriesAnalysis = async () => {
@@ -60,8 +64,19 @@ export default function Page() {
                 if (axios.isAxiosError(error)) console.error(error.message);
             }
         };
+        const fetchTripTimeDistribution = async () => {
+            try {
+                const { data: response, status } = await StatisticsService.getTripTimeDistribution();
+
+                setTripTimeDistribution(response.map(([name, pv]) => ({ name, Rides: pv })))
+
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
+
         setLoading(true);
-        Promise.resolve(fetchTimeSeriesAnalysis()).then(() => setLoading(false))
+        Promise.all([fetchTimeSeriesAnalysis(), fetchTripTimeDistribution()]).then(() => setLoading(false))
     }, []);
 
 
@@ -96,8 +111,8 @@ export default function Page() {
                     <Tab label="General statistics" onClick={() => router.push("/statistics/general")} />
                 </Tabs>
             </Box>
-            <div className='h-full w-full flex flex-row flex-wrap'>
-                <ResponsiveContainer width="33%" height="40%">
+            <div className='h-full w-full flex flex-row flex-wrap pb-4 content-start'>
+                <ResponsiveContainer width="33%" height="45%">
                     <BarChart
                         title='Rides by time of day'
                         width={400}
@@ -110,16 +125,17 @@ export default function Page() {
                             bottom: 5,
                         }}
                     >
+                        <text x="250" y="8" dominantBaseline="hanging" fontSize="20">Rides by time of day</text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
-                        <YAxis />
+                        <YAxis width={70} />
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="Rides" fill="#8884d8" />
                         {/* <Bar dataKey="uv" fill="#82ca9d" /> */}
                     </BarChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="33%" height="40%">
+                <ResponsiveContainer width="33%" height="45%">
                     <BarChart
                         title='Rides by time of day'
                         width={400}
@@ -132,27 +148,50 @@ export default function Page() {
                             bottom: 5,
                         }}
                     >
+                        <text x="250" y="8" dominantBaseline="hanging" fontSize="20">Rides by months</text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
-                        <YAxis />
+                        <YAxis width={70} />
                         <Tooltip />
                         <Legend />
                         <Bar dataKey="Rides" fill="#82ca9d" />
                     </BarChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="33%" height="40%">
+                <ResponsiveContainer width="33%" height="45%">
                     <PieChart width={400} height={400}>
-                        <Pie data={dailyData} dataKey="Rides" cx="50%" cy="50%" outerRadius={60} fill="#8884d8">
-                            {dailyData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
+                        <text x="200" y="8" dominantBaseline="hanging" fontSize="20">Rides by weekdays</text>
+                        <Pie data={dailyData} dataKey="Rides" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={(en) => en.name}>
+                            {
+                                dailyData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))
+                            }
                         </Pie>
                         <Tooltip />
-                        <Legend />
+                        {/* <Legend /> */}
                     </PieChart>
+                </ResponsiveContainer>
+                <ResponsiveContainer width="100%" height="40%">
+                    <LineChart
+                        width={600}
+                        height={300}
+                        data={tripTimeDistribution} // Use the formatted data here
+                        margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                        }}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" unit={'min'} scale={logScale} />
+                        <YAxis width={70} scale={'sqrt'} />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="Rides" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
+                    </LineChart>
                 </ResponsiveContainer>
             </div>
 
-        </div>
+        </div >
     )
 }

@@ -25,19 +25,9 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
         if (!response.ok) {
             throw new Error('Failed to fetch data from QuestDB');
         }
-        
+
         const data = await response.json();
         const dataset = data.dataset;
-        // const totalAmount = dataset[0];
-
-        // const retVal: ChargeDistribution = {
-        //     totalFare: dataset[1] / totalAmount * 100,
-        //     totalExtra: dataset[2] / totalAmount * 100,
-        //     totalMta: dataset[3] / totalAmount * 100,
-        //     totalTips: dataset[4] / totalAmount * 100,
-        //     totalTolls: dataset[5] / totalAmount * 100,
-        //     totalImprovment: dataset[6] / totalAmount * 100,
-        // }
 
         return NextResponse.json([...dataset]);
     } catch (error) {

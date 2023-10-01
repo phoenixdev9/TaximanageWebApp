@@ -26,28 +26,28 @@ class StatisticsService {
             `http://localhost:3000/api/statistics/timeSeriesAnalysis`
         );
     }
-    getTipPercentageDistribution(filter?: FilterCriteria) {
-        let query = "";
+    // getTipPercentageDistribution(filter?: FilterCriteria) {
+    //     let query = "";
 
-        // if (filter) {
-        //     if (filter.pickupDateTime?.[0] != null)
-        //         query += `&pickupDateFrom=${filter.pickupDateTime[0].toDateString()}`
-        //     if (filter.pickupDateTime?.[1] != null)
-        //         query += `&pickupDateTo=${filter.pickupDateTime[1].toDateString()}`
-        //     if (filter.passengerCount)
-        //         query += `&passengerCountFrom=${filter.passengerCount[0]}&passengerCountTo=${filter.passengerCount[1]}`
-        //     if (filter.fareAmount)
-        //         query += `&totalAmountFrom=${filter.fareAmount[0]}&totalAmountTo=${filter.fareAmount[1]}`
-        //     if (filter.tripDistance)
-        //         query += `&tripDistanceFrom=${filter.tripDistance[0]}&tripDistanceTo=${filter.tripDistance[1]}`
-        //     if (filter.paymentType) {
-        //         let typeString = filter.paymentType.join(",")
-        //         query += `&paymentType=${typeString}`
-        //     }
-        // }
+    //     // if (filter) {
+    //     //     if (filter.pickupDateTime?.[0] != null)
+    //     //         query += `&pickupDateFrom=${filter.pickupDateTime[0].toDateString()}`
+    //     //     if (filter.pickupDateTime?.[1] != null)
+    //     //         query += `&pickupDateTo=${filter.pickupDateTime[1].toDateString()}`
+    //     //     if (filter.passengerCount)
+    //     //         query += `&passengerCountFrom=${filter.passengerCount[0]}&passengerCountTo=${filter.passengerCount[1]}`
+    //     //     if (filter.fareAmount)
+    //     //         query += `&totalAmountFrom=${filter.fareAmount[0]}&totalAmountTo=${filter.fareAmount[1]}`
+    //     //     if (filter.tripDistance)
+    //     //         query += `&tripDistanceFrom=${filter.tripDistance[0]}&tripDistanceTo=${filter.tripDistance[1]}`
+    //     //     if (filter.paymentType) {
+    //     //         let typeString = filter.paymentType.join(",")
+    //     //         query += `&paymentType=${typeString}`
+    //     //     }
+    //     // }
 
-        return axios.get<TimeSeriesAnalysisDTO>("http://localhost:3000/api/heatmap");
-    }
+    //     return axios.get<TimeSeriesAnalysisDTO>("http://localhost:3000/api/heatmap");
+    // }
 
     getHeatMapStatistics(filter?: FilterCriteria) {
         return axios.get<[[string, number]]>("http://localhost:3000/api/heatmap");
@@ -66,6 +66,15 @@ class StatisticsService {
     }
     getPassengerCountDistribution() {
         return axios.get<[[number, number]]>(`http://localhost:3000/api/statistics/passengerCountDistribution`);
+    }
+    getTripTimeDistribution() {
+        return axios.get<[[number, number]]>(`http://localhost:3000/api/statistics/tripTimeDistribution`);
+    }
+    getGeneralStats() {
+        return axios.get<[[string, number]]>(`http://localhost:3000/api/statistics/general`);
+    }
+    getTipPercentageDistribution() {
+        return axios.get<[[number, number]]>("http://localhost:3000/api/statistics/tipPercentageDistribution");
     }
 }
 

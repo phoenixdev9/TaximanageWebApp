@@ -1,6 +1,6 @@
 "use client"
 import RideService, { FilterCriteria, PaginationCriteria } from '@/services/RideService';
-import { Accordion, AccordionSummary, Typography, AccordionDetails, Pagination, Box, Tabs, Tab } from '@mui/material';
+import { Accordion, AccordionSummary, Typography, AccordionDetails, Pagination, Box, Tabs, Tab, Container } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import RideFilter from '@/components/rideFilter/rideFilter';
@@ -21,6 +21,8 @@ const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 export default function Page() {
     const [loading, setLoading] = useState(false);
     const [passengerCountDistribution, setPassengerCountDistribution] = useState([]);
+    const [generalStats, setGeneralStats] = useState([]);
+
     const router = useRouter()
 
     useEffect(() => {
@@ -37,8 +39,17 @@ export default function Page() {
                 if (axios.isAxiosError(error)) console.error(error.message);
             }
         };
+        const fetchGeneralStatistics = async () => {
+            try {
+                const { data: response, status } =
+                    await StatisticsService.getGeneralStats();
+                setGeneralStats(response)
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
         setLoading(true);
-        Promise.all([fetchPassengerCountDistribution()]).then(() => setLoading(false))
+        Promise.all([fetchPassengerCountDistribution(), fetchGeneralStatistics()]).then(() => setLoading(false))
     }, []);
 
     const [value, setValue] = useState(0);
@@ -88,6 +99,24 @@ export default function Page() {
                         <text x="175" y="10" dominantBaseline="hanging" fontSize="20">Passenger count distribution</text>
                     </PieChart>
                 </ResponsiveContainer>
+                <div>
+                    <Container maxWidth="md" style={{ marginTop: '50px' }}>
+                        <Typography variant="h4">Statistics</Typography>
+                        <ul>
+                            {generalStats.map(s => <li>{`${s[0]}: ${s[1]}`}</li>)}
+                            {/* <li>Total Number of Trips: </li>
+                            <li>Average Trip Distance: </li>
+                            <li>Average Fare Amount: </li>
+                            <li>Average Tip Amount: </li>
+                            <li>Average Passenger Count: </li>
+                            <li>Total Tolls Amount: </li>
+                            <li>Most Common Payment Type: </li>
+                            <li>Busiest Hour of Day: </li>
+                            <li>Total Revenue: $</li> */}
+                            {/* Add more statistics here */}
+                        </ul>
+                    </Container>
+                </div>
             </div>
 
         </div>
