@@ -184,7 +184,7 @@ export default function Page() {
     // });
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-between p-10 h-screen bg-white overflow-auto">
+        <div className="flex min-h-screen flex-col items-center justify-between p-10 pt-2 h-screen bg-white overflow-auto">
             {loading && (
                 <div className="flex flex-grow justify-center absolute top-1/2 left-1/2 z-10 bg-white rounded-lg">
                     <div className="flex flex-col justify-center">
@@ -211,8 +211,9 @@ export default function Page() {
                     </h4>
                     <pre>{formatQuery(query, 'sql')}</pre> */}
                 </div>
-                <div className='overflow-clip h-3/4 shadow-md mb-4'>
+                <div className='overflow-auto h-3/4 shadow-md mb-4'>
                     <DataGrid
+                        className='h-full'
                         // apiRef={friRef}
                         rowHeight={40}
                         // columnHeaderHeight={70}

@@ -3,7 +3,7 @@ import { FilterCriteria } from '@/services/RideService';
 import { Box, Tabs, Tab } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { initialFilterCriteria } from '../list/page';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 interface GraphData {
     name: string,
@@ -14,6 +14,8 @@ const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 
 
 export default function Page() {
+    redirect('/statistics/time');
+
     const [loading, setLoading] = useState(true);
     const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>(initialFilterCriteria);
     const [tipPercentageDistribution, setTipPercentageDistribution] = useState<[]>([])
