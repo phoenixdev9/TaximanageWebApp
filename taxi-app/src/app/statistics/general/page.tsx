@@ -9,20 +9,48 @@ import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Resp
 import StatisticsService from '@/services/StatisticsService';
 import { useRouter } from 'next/navigation';
 import { LoadingSpinner } from '@/components/common/loadingSpinner/loadingSpinner';
+import { DataGrid, GridColDef, GridColumnHeaderParams } from '@mui/x-data-grid';
+import dynamic from 'next/dynamic';
+import Geohash from 'latlon-geohash';
 
 interface GraphData {
     name: string,
     Rides: number
 }
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF33FF', '#33CCFF', '#FF6633'];
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
+const Map = dynamic(() => import('../../../components/geohashMap/geohashMap'), {
+    ssr: false,
+});
 
 export default function Page() {
     const [loading, setLoading] = useState(false);
     const [passengerCountDistribution, setPassengerCountDistribution] = useState([]);
+    const [tipPercentagePerPassengerCountDistribution, setTipPercentagePerPassengerCountDistribution] = useState([]);
     const [generalStats, setGeneralStats] = useState([]);
+    const [topGeohashesPrecise, setTopGeohashesPrecise] = useState([]);
+    const [topGeohashesBroad, setTopGeohashesBroad] = useState([]);
 
+    const columns: GridColDef[] = [
+        // { field: "id", headerName: "Id", flex: 1 },
+        {
+            field: "stat", headerName: "Statistic", flex: 1,
+            renderHeader: (params: GridColumnHeaderParams) => (
+                <div className='font-bold text-xl'>
+                    {'Statistic'}
+                </div>
+            ),
+        },
+        {
+            field: "value", headerName: "Value", flex: 1,
+            renderHeader: (params: GridColumnHeaderParams) => (
+                <div className='font-bold text-xl'>
+                    {'Value'}
+                </div>
+            ),
+        }
+    ];
+    const [currentRows, setCurrentRows] = useState<
+        Array<{ id: number, stat: string, value: string }>>([]);
     const router = useRouter()
 
     useEffect(() => {
@@ -39,17 +67,69 @@ export default function Page() {
                 if (axios.isAxiosError(error)) console.error(error.message);
             }
         };
+        const fetchTipPerPassengerCount = async () => {
+            try {
+                const { data: response, status } =
+                    await StatisticsService.getTipPerPassengerCount();
+                const formatedData = response.map((item) => ({
+                    name: item[0],
+                    Percentage: item[1],
+                }));
+                setTipPercentagePerPassengerCountDistribution(formatedData)
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
         const fetchGeneralStatistics = async () => {
             try {
                 const { data: response, status } =
                     await StatisticsService.getGeneralStats();
                 setGeneralStats(response)
+                setCurrentRows(response.map((r, ind) =>
+                ({
+                    id: ind,
+                    stat: r[0],
+                    value: r[1]
+                })))
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
+        const fetchTopGeohashesPrecise = async () => {
+            try {
+                const { data: response, status } =
+                    await StatisticsService.getTopGeohashPrecise();
+                const formatedData = response.map((item) => {
+                    const latlon = Geohash.decode(item[0])
+                    return ({
+                        pos: { lat: latlon.lat, lng: latlon.lon },
+                        count: item[1]
+                    })
+                })
+                console.log(formatedData)
+                setTopGeohashesPrecise(formatedData)
+            } catch (error) {
+                if (axios.isAxiosError(error)) console.error(error.message);
+            }
+        };
+        const fetchTopGeohashesBroad = async () => {
+            try {
+                const { data: response, status } =
+                    await StatisticsService.getTopGeohashBroad();
+                const formatedData = response.map((item) => {
+                    const latlon = Geohash.decode(item[0])
+                    return ({
+                        pos: { lat: latlon.lat, lng: latlon.lon },
+                        count: item[1]
+                    })
+                })
+                setTopGeohashesBroad(formatedData)
             } catch (error) {
                 if (axios.isAxiosError(error)) console.error(error.message);
             }
         };
         setLoading(true);
-        Promise.all([fetchPassengerCountDistribution(), fetchGeneralStatistics()]).then(() => setLoading(false))
+        Promise.all([fetchPassengerCountDistribution(), fetchGeneralStatistics(), fetchTipPerPassengerCount(), fetchTopGeohashesPrecise(), fetchTopGeohashesBroad()]).then(() => setLoading(false))
     }, []);
 
     const [value, setValue] = useState(0);
@@ -85,40 +165,93 @@ export default function Page() {
                     <Tab label="General statistics" />
                 </Tabs>
             </Box>
-            <span>Based on 161,843,930 rides</span>
-            <div className='h-full w-full flex flex-row flex-wrap'>
-                <ResponsiveContainer width="33%" height="30%">
-                    <PieChart width={300} height={250}>
-                        <Pie data={passengerCountDistribution} dataKey="count" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={(en) => en.name}>
-                            {passengerCountDistribution.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                        <text x="175" y="10" dominantBaseline="hanging" fontSize="20">Passenger count distribution</text>
-                    </PieChart>
-                </ResponsiveContainer>
-                <div>
-                    <Container maxWidth="md" style={{ marginTop: '50px' }}>
+            <div className='w-full h-full flex'>
+                <div className='w-1/4 pt-8 h-5/6'>
+                    {/* <Container maxWidth="md" style={{ marginTop: '50px' }}>
                         <Typography variant="h4">Statistics</Typography>
                         <ul>
                             {generalStats.map(s => <li>{`${s[0]}: ${s[1]}`}</li>)}
-                            {/* <li>Total Number of Trips: </li>
-                            <li>Average Trip Distance: </li>
-                            <li>Average Fare Amount: </li>
-                            <li>Average Tip Amount: </li>
-                            <li>Average Passenger Count: </li>
-                            <li>Total Tolls Amount: </li>
-                            <li>Most Common Payment Type: </li>
-                            <li>Busiest Hour of Day: </li>
-                            <li>Total Revenue: $</li> */}
-                            {/* Add more statistics here */}
                         </ul>
-                    </Container>
+                    </Container> */}
+                    <DataGrid
+                        density='standard'
+                        rows={currentRows}
+                        columns={columns}
+                        disableColumnMenu
+                        hideFooter
+                        className='bg-blue-100'
+                        sx={{
+                            fontSize: 18,
+                            boxShadow: 2,
+                            border: 2,
+                            borderColor: 'primary.light',
+                            '& .MuiDataGrid-cell:hover': {
+                                color: 'primary.main',
+                            },
+                        }}
+                    />
+                </div>
+                <div className='h-full w-full flex flex-row flex-wrap
+                 pt-5 content-start justify-around'>
+                    <ResponsiveContainer width="50%" height="45%">
+                        <PieChart width={300} height={250}>
+                            <Pie data={passengerCountDistribution} dataKey="count" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label={(en) => en.name}>
+                                {passengerCountDistribution.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            {/* <Legend /> */}
+                            <text x="200" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                                Passenger count distribution
+                            </text>
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <ResponsiveContainer width="50%" height="45%">
+                        <BarChart
+                            title='Rides by time of day'
+                            width={400}
+                            height={270}
+                            data={tipPercentagePerPassengerCountDistribution}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                        >
+                            <text x="250" y="0" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                                Average tip percentage by passenger count
+                            </text>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis width={70} unit={"%"} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="Percentage" fill="#8884d8" />
+                            {/* <Bar dataKey="uv" fill="#82ca9d" /> */}
+                        </BarChart>
+                    </ResponsiveContainer>
+                    <div className='w-full h-2/5 flex'>
+                        <div className='w-1/2 h-full ml-4 shadow-xl flex flex-col justify-center' >
+                            <div className='h-7 text-xl w-full text-center'>
+                                <span className='text-orange-400 font-bold'>Precise geohash with most pickups (23409m<sup>2</sup>)</span>
+                            </div>
+                            <div className='h-full w-full border-2 border-blue-300'>
+                                {topGeohashesPrecise.length > 0 && <Map metersInHash={153} hashes={topGeohashesPrecise} />}
+                            </div>
+                        </div>
+                        <div className='w-1/2 h-full ml-4 shadow-xl flex flex-col justify-center' >
+                            <div className='h-7 text-xl w-full text-center'>
+                                <span className='text-orange-400 font-bold'>Broad geohash with most pickups (23.91km<sup>2</sup>)</span>
+                            </div>
+                            <div className='h-full w-full border-2 border-blue-300'>
+                                {topGeohashesBroad.length > 0 && <Map metersInHash={4890} hashes={topGeohashesBroad} />}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
     )
 }

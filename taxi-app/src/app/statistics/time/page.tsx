@@ -44,17 +44,17 @@ export default function Page() {
                 setTimeSeriesAnalysis(response)
                 const hourlyData = response.hourOfDayAnalysis.map((item) => ({
                     name: convertHour(item[0].toString()),
-                    Rides: item[1],
+                    Count: item[1],
                 }));
 
                 const monthlyData = response.monthlyAnalysis.map((item) => ({
                     name: dayjs().month(item[0] - 1).format('MMMM'),
-                    Rides: item[1],
+                    Count: item[1],
                 }));
 
                 const dailyData = response.dayOfWeekAnalysis.map((item) => ({
                     name: WEEKDAYS[item[0]],
-                    Rides: item[1],
+                    Count: item[1],
                 }));
 
                 setHourlyData(hourlyData);
@@ -68,7 +68,7 @@ export default function Page() {
             try {
                 const { data: response, status } = await StatisticsService.getTripTimeDistribution();
 
-                setTripTimeDistribution(response.map(([name, pv]) => ({ name, Rides: pv })))
+                setTripTimeDistribution(response.map(([name, pv]) => ({ name, Count: pv })))
 
             } catch (error) {
                 if (axios.isAxiosError(error)) console.error(error.message);
@@ -125,13 +125,15 @@ export default function Page() {
                             bottom: 5,
                         }}
                     >
-                        <text x="250" y="8" dominantBaseline="hanging" fontSize="20">Rides by time of day</text>
+                        <text x="250" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Rides over time of day
+                        </text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis width={70} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Rides" fill="#8884d8" />
+                        <Bar dataKey="Count" fill="#8884d8" />
                         {/* <Bar dataKey="uv" fill="#82ca9d" /> */}
                     </BarChart>
                 </ResponsiveContainer>
@@ -148,19 +150,23 @@ export default function Page() {
                             bottom: 5,
                         }}
                     >
-                        <text x="250" y="8" dominantBaseline="hanging" fontSize="20">Rides by months</text>
+                        <text x="250" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Rides over months
+                        </text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" />
                         <YAxis width={70} />
                         <Tooltip />
                         <Legend />
-                        <Bar dataKey="Rides" fill="#82ca9d" />
+                        <Bar dataKey="Count" fill="#82ca9d" />
                     </BarChart>
                 </ResponsiveContainer>
                 <ResponsiveContainer width="33%" height="45%">
                     <PieChart width={400} height={400}>
-                        <text x="200" y="8" dominantBaseline="hanging" fontSize="20">Rides by weekdays</text>
-                        <Pie data={dailyData} dataKey="Rides" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={(en) => en.name}>
+                        <text x="200" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Rides over weekdays
+                        </text>
+                        <Pie data={dailyData} dataKey="Count" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label={(en) => en.name}>
                             {
                                 dailyData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -168,7 +174,6 @@ export default function Page() {
                             }
                         </Pie>
                         <Tooltip />
-                        {/* <Legend /> */}
                     </PieChart>
                 </ResponsiveContainer>
                 <ResponsiveContainer width="100%" height="40%">
@@ -182,12 +187,15 @@ export default function Page() {
                             left: 20,
                         }}
                     >
+                        <text x="750" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Trip time distribution
+                        </text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" unit={'min'} scale={logScale} />
                         <YAxis width={70} scale={'sqrt'} />
                         <Tooltip />
                         <Legend />
-                        <Line type="monotone" dataKey="Rides" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
+                        <Line type="monotone" dataKey="Count" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
                     </LineChart>
                 </ResponsiveContainer>
             </div>

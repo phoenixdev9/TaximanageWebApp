@@ -62,7 +62,6 @@ export default function Page() {
             ],
         }
     ];
-    const firstUpdate = useRef(true);
     const [currentRows, setCurrentRows] = useState<Array<Ride & { id?: number }>
     >([]);
     const [paginationModel, setPaginationModel] = useState<PaginationCriteria>({

@@ -8,6 +8,7 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { Button, Icon } from "@mui/material";
 import { useRouter } from "next/navigation";
+import dayjs from "dayjs";
 
 //Icon missing fix
 
@@ -48,7 +49,7 @@ export default function RidesMap({ rides }: RidesMapProps) {
                     // icon={defau}
                     >
                         <Popup>
-                            <p><strong>Pickup: </strong>{ride.pickupDatetime.toLocaleString()}</p>
+                            <p><strong>Pickup: </strong>{dayjs(ride.pickupDatetime).toString()}</p>
                             {/* <div className="w-full "></div> */}
                             <Button variant="outlined" fullWidth startIcon={<Icon className="material-symbols-outlined">info</Icon>}
                                 onClick={() =>

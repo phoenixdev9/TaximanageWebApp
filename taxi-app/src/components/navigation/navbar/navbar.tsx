@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import Logo from './logo';
 
-const pages = ['map', 'list', 'statistics', 'predict', 'heatmap'];
+const pages = ['map', 'list', 'statistics', 'heatmap'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
@@ -90,7 +90,9 @@ function Navbar() {
                         >
                             {pages.map((page) => (
                                 <MenuItem key={page} onClick={handleCloseNavMenu}
-                                    color={window.location.href.includes(`/${page}`) ? 'blue' : 'white'} >
+                                    // color={(window && window.location.href.includes(`/${page}`)) ? 'blue' : 'white'} 
+                                    color={'white'}
+                                >
                                     <Typography textAlign="center">{page}</Typography>
                                 </MenuItem>
                             ))}
@@ -123,10 +125,11 @@ function Navbar() {
                                 onClick={handleCloseNavMenu}
                                 sx={{
                                     my: 2,
-                                    color: window.location.href.includes(`/${page}`) ? 'burlywood' : 'white',
+                                    // color: (window && window.location.href.includes(`/${page}`)) ? 'burlywood' : 'white',
+                                    color: 'white',
                                     display: 'block',
                                     textUnderlineOffset: '4px',
-                                    textDecoration: window.location.href.includes(`/${page}`) ? 'underline' : "",
+                                    // textDecoration: (window && window.location.href.includes(`/${page}`)) ? 'underline' : "",
                                     textDecorationThickness: '3px',
                                 }}
                             >

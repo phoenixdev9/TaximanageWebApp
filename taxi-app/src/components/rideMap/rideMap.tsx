@@ -26,6 +26,7 @@ export default function RideMap({ ride }: RideMapProps) {
     return (
         <MapContainer className="h-full w-full" center={[(ride.pickupLongitude + ride.dropoffLongitude) / 2,
         (ride.pickupLatitude + ride.dropoffLatitude) / 2]}
+            preferCanvas={true}
             zoom={15} scrollWheelZoom={true}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

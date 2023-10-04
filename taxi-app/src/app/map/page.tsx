@@ -5,9 +5,12 @@ import axios from 'axios';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import RideFilter from '@/components/rideFilter/rideFilter';
+import RideFilter, { FilterType } from '@/components/rideFilter/rideFilter';
 import { initialFilterCriteria } from '../list/page';
 import { LoadingSpinner } from '@/components/common/loadingSpinner/loadingSpinner';
+import { RuleGroupType, formatQuery } from 'react-querybuilder';
+import dayjs from 'dayjs';
+import { useRouter } from 'next/navigation';
 
 const Map = dynamic(() => import('../../components/ridesMap/ridesMap'), {
     ssr: false,
@@ -16,44 +19,49 @@ const Map = dynamic(() => import('../../components/ridesMap/ridesMap'), {
 
 export default function Page() {
     const [rides, setRides] = useState<Ride[]>([]);
-    const [rowCountState, setRowCountState] = useState<number>();
-    const [loading, setLoading] = useState(true);
-    const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>(initialFilterCriteria);
     const [paginationModel, setPaginationModel] = useState<PaginationCriteria>({
         page: 0,
-        pageSize: 10000,
+        pageSize: 1000,
     });
-
+    const [loading, setLoading] = useState(true);
+    const [filtered, setFiltered] = useState(false);
+    const [rowCountState, setRowCountState] = useState<number>();
+    const fetchRides = async (filtered: boolean, filterType: FilterType) => {
+        try {
+            const { data: response, status } = filterType == "Basic" ? await RideService.getRides(paginationModel,
+                filtered ? filterCriteria : undefined)
+                : await RideService.getRidesByQuery(paginationModel, formatQuery(query, 'sql'));
+            setRides(response.rides);
+            setRowCountState((prevRowCountState) =>
+                response.totalCount !== undefined ? response.totalCount : prevRowCountState,
+            );
+            setLoading(false);
+        } catch (error) {
+            if (axios.isAxiosError(error)) console.error(error.message);
+        }
+    };
     useEffect(() => {
-        const fetchRides = async () => {
-            try {
-                const { data: response, status } = await RideService.getRides(paginationModel);
-                setRides(response.rides);
-                setRowCountState((prevRowCountState) =>
-                    response.totalCount !== undefined ? response.totalCount : prevRowCountState,
-                );
-            } catch (error) {
-                if (axios.isAxiosError(error)) console.error(error.message);
-            }
-        };
         setLoading(true);
-        Promise.resolve(fetchRides()).then(() => setLoading(false))
-    }, [paginationModel.page]);
+        fetchRides(filtered, filterType);
+    }, [paginationModel.page, paginationModel.pageSize]);
+
+    const router = useRouter()
+
+    const [filterCriteria, setFilterCriteria] = useState<FilterCriteria>(initialFilterCriteria);
+    const [query, setQuery] = useState<RuleGroupType>({
+        combinator: 'and',
+        rules: [
+            { field: 'pickup_datetime', operator: '>=', value: dayjs("2015-01-01").format('YYYY-MM-DD') },
+            { field: 'dropoff_datetime', operator: '<=', value: dayjs("2016-01-01").format('YYYY-MM-DD') },
+        ],
+    });
+    const [filterType, setFilterType] = useState<FilterType>('Basic')
+    const [queryString, setQueryString] = useState("");
 
     const handleFilterSubmit = () => {
-        const filterRides = async () => {
-            try {
-                const { data: response, status } = await RideService.getRides(paginationModel, filterCriteria);
-                setRides(response.rides);
-                setRowCountState((prevRowCountState) =>
-                    response.totalCount !== undefined ? response.totalCount : prevRowCountState,
-                );
-            } catch (error) {
-                if (axios.isAxiosError(error)) console.error(error.message);
-            }
-        }
-        setLoading(true)
-        Promise.resolve(filterRides()).then(() => setLoading(false))
+        if (!filtered) setFiltered(true)
+        setLoading(true);
+        fetchRides(true, filterType);
     }
 
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
@@ -83,7 +91,12 @@ export default function Page() {
                     <RideFilter
                         fetchFilteredRides={handleFilterSubmit}
                         filterCriteria={filterCriteria}
-                        setFilterCriteria={setFilterCriteria} />
+                        setFilterCriteria={setFilterCriteria}
+                        query={query}
+                        setQuery={setQuery}
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                    />
                     {rowCountState &&
                         <Pagination count={Math.ceil(rowCountState / paginationModel.pageSize)}
                             color="primary" onChange={handlePageChange} />}

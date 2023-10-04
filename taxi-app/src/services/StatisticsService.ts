@@ -71,10 +71,21 @@ class StatisticsService {
         return axios.get<[[number, number]]>(`http://localhost:3000/api/statistics/tripTimeDistribution`);
     }
     getGeneralStats() {
-        return axios.get<[[string, number]]>(`http://localhost:3000/api/statistics/general`);
+        return axios.get<[[string, string]]>(`http://localhost:3000/api/statistics/general`);
     }
     getTipPercentageDistribution() {
         return axios.get<[[number, number]]>("http://localhost:3000/api/statistics/tipPercentageDistribution");
+    }
+    getTipPerPassengerCount() {
+        return axios.get<[[number, number]]>("http://localhost:3000/api/statistics/tipPerPassengerCount");
+    }
+    getTopGeohashPrecise() {
+        return axios.get<[[string, number]]>
+            ("http://localhost:3000/api/topGeohashPrecise");
+    }
+    getTopGeohashBroad() {
+        return axios.get<[[string, number]]>
+            ("http://localhost:3000/api/topGeohashBroad");
     }
 }
 

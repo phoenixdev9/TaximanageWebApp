@@ -143,80 +143,24 @@ export default function Page() {
                     <Tab label="General statistics" onClick={() => router.push("/statistics/general")} />
                 </Tabs>
             </Box>
-            <span>Based on 161,843,930 rides</span>
             <div className='h-full w-full flex flex-row flex-wrap content-start'>
-                {/* <ResponsiveContainer width="50%" height={400}>
-                    <ScatterChart
-                        margin={{
-                            top: 20,
-                            right: 20,
-                            bottom: 20,
-                            left: 20,
-                        }}
-                    >
-                        <CartesianGrid />
-                        <XAxis type="number" dataKey="name" name="stature" unit="cm" />
-                        <YAxis type="number" dataKey="Rides" name="weight" unit="kg" />
-                        <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                        <Scatter name="A school" data={tipPercentageDistribution} fill="#8884d8" />
-                    </ScatterChart>
-                </ResponsiveContainer> */}
-
-                {/* TODO: NOTEPAD++ spisak */}
-                {/* Tip percentage Distribution */}
-                {/* <ResponsiveContainer width="50%" height="50%">
-                    <LineChart
-                        width={500}
-                        height={300}
-                        data={tipPercentageDistribution}
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" scale="log" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="Rides" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    </LineChart>
-                </ResponsiveContainer> */}
-                <ResponsiveContainer width="28%" height="40%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={formatRadarChartData(chargeDistribution)}>
+                <ResponsiveContainer width="28%" height="50%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={formatRadarChartData(chargeDistribution)}>
+                        <text x="175" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Charge distribution
+                        </text>
                         <PolarGrid />
+                        <Tooltip />
                         <PolarAngleAxis dataKey="subject" />
                         <PolarRadiusAxis />
-                        <Radar name="Mike" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                        <Radar name="Percentage"
+                            dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
                     </RadarChart>
                 </ResponsiveContainer>
-                {/* <ResponsiveContainer width="72%" height="40%">
-                    <LineChart
-                        width={500}
-                        height={300}
-                        data={tipPerDistanceDistribution} // Use the formatted data here
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" unit={'mi'} />
-                        <YAxis unit={'$'} scale={'sqrt'} />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="Tip" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} />
-                    </LineChart>
-                </ResponsiveContainer> */}
                 <ResponsiveContainer width="72%" height="40%">
                     <ScatterChart
                         width={500}
                         height={300}
-                        // data={tipPerDistanceDistribution} // Use the formatted data here
                         margin={{
                             top: 5,
                             right: 30,
@@ -224,6 +168,9 @@ export default function Page() {
                             bottom: 5,
                         }}
                     >
+                        <text x="450" y="6" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Tip per distance distribution
+                        </text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <Tooltip />
                         {/* <XAxis dataKey="name" type="number" label={{ value: 'Index', position: 'insideBottomRight', offset: 0 }} />
@@ -235,18 +182,20 @@ export default function Page() {
                         {/* <Line type="monotone" dataKey="Tip" stroke="#8884d8" activeDot={{ r: 2 }} dot={{ r: 1 }} /> */}
                     </ScatterChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="33%" height="35%">
+                <ResponsiveContainer width="30%" height="35%">
                     <PieChart width={300} height={250}>
-                        <Pie data={paymentTypeDistribution} dataKey="percent" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label={(en) => en.name}>
+                        <Pie data={paymentTypeDistribution} dataKey="percent" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label={(en) => en.name}>
                             {paymentTypeDistribution.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
+                        <text x="175" y="10" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Payment type distribution</text>
                         <Tooltip />
                         {/* <Legend /> */}
                     </PieChart>
                 </ResponsiveContainer>
-                <ResponsiveContainer width="66%" height="40%">
+                <ResponsiveContainer width="70%" height="40%">
                     <LineChart
                         width={600}
                         height={300}
@@ -257,6 +206,9 @@ export default function Page() {
                             left: 20,
                         }}
                     >
+                        <text x="425" y="10" dominantBaseline="hanging" fontSize="20" stroke='orange' fill='orange'>
+                            Tip percentage distribution
+                        </text>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" unit={'%'} scale={logScale} />
                         <YAxis width={70} scale={'pow'} />
