@@ -10,3 +10,7 @@ interface TimeSeriesAnalysisDTO {
     dayOfWeekAnalysis: [[number, number]];
     hourOfDayAnalysis: [[number, number]];
 }
+interface RealTimeResponseDTO {
+    rides: Ride[];
+    reqTime: Date;
+}

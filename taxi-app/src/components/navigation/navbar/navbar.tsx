@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import Logo from './logo';
 
-const pages = ['map', 'list', 'statistics', 'heatmap'];
+const pages = ['map', 'list', 'statistics', 'heatmap', 'realtime'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {

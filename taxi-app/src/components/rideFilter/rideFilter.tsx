@@ -205,9 +205,9 @@ export default function RideFilter({ filterCriteria, setFilterCriteria, fetchFil
                                     MenuProps={MenuProps}
                                 >
                                     {paymentTypes.map((type) => (
-                                        <MenuItem key={type} value={type}>
-                                            <Checkbox checked={(filterCriteria.paymentType?.indexOf(type) ?? -1) > -1} />
-                                            <ListItemText primary={type} />
+                                        <MenuItem key={type.name} value={type.name}>
+                                            <Checkbox checked={(filterCriteria.paymentType?.indexOf(type.name) ?? -1) > -1} />
+                                            <ListItemText primary={type.name} />
                                         </MenuItem>
                                     ))}
                                 </Select>
