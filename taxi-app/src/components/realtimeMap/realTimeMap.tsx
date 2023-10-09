@@ -5,7 +5,6 @@ import L from 'leaflet';
 import inProgressIcon from '/public/rideInProgress.png'
 import doneIcon from '/public/rideDone.png'
 import MarkerClusterGroup from 'react-leaflet-cluster'
-import { Button, Icon } from "@mui/material";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 
@@ -25,7 +24,6 @@ interface RealTiemMapProps {
 }
 
 export default function RealTimeMap({ rides }: RealTiemMapProps) {
-    const router = useRouter()
     console.log(rides)
     return (
         <MapContainer center={[40.730610, -73.935242]} zoom={13} scrollWheelZoom={true} className="w-full h-full"
@@ -45,16 +43,20 @@ export default function RealTimeMap({ rides }: RealTiemMapProps) {
                         icon={ride.dropoffDatetime ? rideDoneIcon : rideInProgressIcon}
                     >
                         <Popup>
+                            <p><strong>Status: </strong>{ride.dropoffDatetime ? 'Completed' : 'In progress'}</p>
                             <p><strong>Pickup: </strong>{dayjs(ride.pickupDatetime).toString()}</p>
-                            {/* <div className="w-full "></div> */}
-                            {/* <Button variant="outlined" fullWidth startIcon={<Icon className="material-symbols-outlined">info</Icon>}
-                                onClick={() =>
-                                    router.push(`/ride?pickup=${ride.pickupDatetime}&dropoff=${ride.dropoffDatetime}&lat=${ride.pickupLatitude}&lng=${ride.pickupLongitude}`)}>
-                                Ride Details
-                            </Button> */}
+                            <p><strong>Passenger Count: </strong>{ride.passengerCount}</p>
+                            {ride.dropoffDatetime &&
+                                <>
+                                    <p><strong>Dropoff: </strong>{dayjs(ride.dropoffDatetime).toString()}</p>
+                                    <p><strong>Tip Amount: </strong>${ride.tipAmount}</p>
+                                    <p><strong>Total Amount: </strong>${ride.totalAmount}</p>
+                                    <p><strong>Payment Type: </strong>{ride.paymentType}</p>
+                                    <p><strong>Trip Distance: </strong>{ride.tripDistance}mi</p>
+                                </>}
                         </Popup></Marker>
                 ))}
             </MarkerClusterGroup>
-        </MapContainer>
+        </MapContainer >
     )
 }
