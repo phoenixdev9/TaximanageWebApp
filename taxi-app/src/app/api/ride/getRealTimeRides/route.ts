@@ -33,7 +33,6 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
             OR
                 dropoff_datetime > '${dayjs(reqTime).toISOString()}'
                 `
-        console.log(sql)
         let actualTime;
         let dataset: any[][]
 
@@ -72,7 +71,6 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
                 break;
         }
 
-        // console.log(dataset)
         let retVal: RealTimeResponseDTO = {
             rides: dataset.map(ride =>
             ({

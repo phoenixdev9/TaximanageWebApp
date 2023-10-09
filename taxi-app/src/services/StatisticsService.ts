@@ -1,5 +1,6 @@
 import { axiosInstance } from "@/components/utils/http";
 import axios from "axios";
+import { Dayjs } from "dayjs";
 
 export interface PaginationCriteria {
     page: number,
@@ -86,6 +87,10 @@ class StatisticsService {
     getTopGeohashBroad() {
         return axios.get<[[string, number]]>
             ("http://localhost:3000/api/topGeohashBroad");
+    }
+    getRealTimeStats(reqTime: Dayjs) {
+        let query = `startTime=${reqTime.toLocaleString()}`
+        return axios.get<[[string, string]]>(`http://localhost:3000/api/statistics/realTimeStats?${query}`);
     }
 }
 

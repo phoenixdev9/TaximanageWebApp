@@ -68,10 +68,8 @@ class TaxiService {
         // );
         return axios.get<Ride>(`http://localhost:3000/api/ride/getRide?${query}`)
     }
-    getRealTimeRides(reqTime: Dayjs, prevTime?: Dayjs) {
+    getRealTimeRides(reqTime: Dayjs) {
         let query = `reqTime=${reqTime.toLocaleString()}`
-        if (prevTime)
-            query += `&prevTime=${prevTime.toLocaleString()}`
         return axios.get<RealTimeResponseDTO>(`http://localhost:3000/api/ride/getRealTimeRides?${query}`)
     }
 }

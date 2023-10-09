@@ -4,8 +4,10 @@ import axios from 'axios';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { LoadingSpinner } from '@/components/common/loadingSpinner/loadingSpinner';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
+import StatisticsService from '@/services/StatisticsService';
+
 
 const Map = dynamic(() => import('../../components/realtimeMap/realTimeMap'), {
     ssr: false,
@@ -14,18 +16,29 @@ const Map = dynamic(() => import('../../components/realtimeMap/realTimeMap'), {
 export default function Page() {
     const [rides, setRides] = useState<Ride[]>([]);
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState<[[string, string]]>()
     const fetching = useRef(false);
-
+    const fetchStats = async (reqTime: Dayjs) => {
+        const { data: response, status } = await StatisticsService.getRealTimeStats(reqTime);
+        setStats(response)
+    }
+    let statsIntervalId: NodeJS.Timeout
     const fetchRides = async () => {
         try {
             // let prevTime = undefined
             let reqTime = dayjs()
+            //TESTING
+            let initTime = reqTime
+            // statsIntervalId = setInterval(() => fetchStats(initTime), 10000);
+
+            // const { data: response, status } = await StatisticsService.getRealTimeStats(reqTime);
+            // console.log(response)
+            //
             while (true) {
                 const { data: response, status } = await RideService.getRealTimeRides(reqTime);
                 if (status != axios.HttpStatusCode.Ok)
                     break;
-                //TODO: Add completed rides state to avoid unneceserry rerender
-                //also check for response including already completed rides and filter them out of response
+                fetchStats(initTime)
                 setRides(prev => {
                     let prevKeep = prev.filter(p => !p.dropoffDatetime
                         && !response.rides.find(r => r.pickupDatetime == p.pickupDatetime
@@ -43,6 +56,7 @@ export default function Page() {
             }
         } catch (error) {
             if (axios.isAxiosError(error)) console.error(error.message);
+            clearInterval(statsIntervalId)
         }
     };
     useEffect(() => {
@@ -69,6 +83,12 @@ export default function Page() {
             <div className='h-full w-full'>
                 {!loading && <Map rides={rides} />}
             </div>
+            {stats?.length > 0 && <div className='h-1/6 w-1/4 absolute top-20 right-4 bg-blue-400 z-50 bg-opacity-50 text-black p-4 text-xl'>
+                <p>Number of rides: <strong>{stats[0][1]}</strong></p>
+                <p>Total revenue: <strong>{stats[1][1]}</strong></p>
+                <p>Total tip amount: <strong>{stats[2][1]}</strong></p>
+                <p>Average Distance: <strong>{stats[3][1]}</strong></p>
+            </div>}
         </div>
     )
 }
