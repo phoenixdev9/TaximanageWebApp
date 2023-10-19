@@ -90,7 +90,7 @@ class StatisticsService {
     }
     getRealTimeStats(reqTime: Dayjs) {
         let query = `startTime=${reqTime.toLocaleString()}`
-        return axios.get<[[string, string]]>(`http://localhost:3000/api/statistics/realTimeStats?${query}`);
+        return axios.get<[[string, number]]>(`http://localhost:3000/api/statistics/realTimeStats?${query}`);
     }
 }
 

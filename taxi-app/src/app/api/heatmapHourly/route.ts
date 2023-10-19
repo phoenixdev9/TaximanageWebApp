@@ -32,6 +32,7 @@ export async function GET(req: NextApiRequest) {
         },
     })
     const data = await res.json()
+    //@ts-ignore
     const response = data.dataset.map(row => [row[0], row[2]])
     // const response = data.dataset.map(row => [row[0], row[1]])
     return NextResponse.json(response)

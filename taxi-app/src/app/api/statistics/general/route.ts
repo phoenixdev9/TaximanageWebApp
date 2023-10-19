@@ -218,6 +218,7 @@ export async function GET(req: NextApiRequest) {
         })
         const data = await res.json()
         const dataset = data.dataset
+        //@ts-ignore
         response.push(...dataset)
     }
     try {

@@ -19,7 +19,7 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
             UNION ALL
             SELECT
                 'Total Revenue',
-                '$' || sum(total_amount)
+                sum(total_amount)
             FROM
                 realtime_test
             WHERE
@@ -29,7 +29,7 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
             UNION ALL
             SELECT
                 'Total Tip',
-                '$' || round(sum(tip_amount),2)
+                sum(tip_amount)
             FROM
                 realtime_test
             WHERE
@@ -39,7 +39,7 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
             UNION ALL
             SELECT
                 'Average distance',
-                round(avg(trip_distance),2) || 'mi'
+                avg(trip_distance)
             FROM
                 realtime_test
             WHERE

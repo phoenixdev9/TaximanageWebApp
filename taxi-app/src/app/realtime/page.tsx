@@ -16,24 +16,18 @@ const Map = dynamic(() => import('../../components/realtimeMap/realTimeMap'), {
 export default function Page() {
     const [rides, setRides] = useState<Ride[]>([]);
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<[[string, string]]>()
+    const [stats, setStats] = useState<[[string, number]]>()
     const fetching = useRef(false);
     const fetchStats = async (reqTime: Dayjs) => {
         const { data: response, status } = await StatisticsService.getRealTimeStats(reqTime);
         setStats(response)
     }
-    let statsIntervalId: NodeJS.Timeout
+
     const fetchRides = async () => {
         try {
             // let prevTime = undefined
             let reqTime = dayjs()
-            //TESTING
             let initTime = reqTime
-            // statsIntervalId = setInterval(() => fetchStats(initTime), 10000);
-
-            // const { data: response, status } = await StatisticsService.getRealTimeStats(reqTime);
-            // console.log(response)
-            //
             while (true) {
                 const { data: response, status } = await RideService.getRealTimeRides(reqTime);
                 if (status != axios.HttpStatusCode.Ok)
@@ -56,7 +50,6 @@ export default function Page() {
             }
         } catch (error) {
             if (axios.isAxiosError(error)) console.error(error.message);
-            clearInterval(statsIntervalId)
         }
     };
     useEffect(() => {
@@ -83,11 +76,12 @@ export default function Page() {
             <div className='h-full w-full'>
                 {!loading && <Map rides={rides} />}
             </div>
-            {stats?.length > 0 && <div className='h-1/6 w-1/4 absolute top-20 right-4 bg-blue-400 z-50 bg-opacity-50 text-black p-4 text-xl'>
+            {stats?.length > 0 && <div className='h-1/6 w-1/6 absolute top-20 right-3 bg-blue-400 z-50 bg-opacity-50 text-black p-4 text-xl'>
+                <p className='text-2xl'><strong>Realtime statistics</strong></p>
                 <p>Number of rides: <strong>{stats[0][1]}</strong></p>
-                <p>Total revenue: <strong>{stats[1][1]}</strong></p>
-                <p>Total tip amount: <strong>{stats[2][1]}</strong></p>
-                <p>Average Distance: <strong>{stats[3][1]}</strong></p>
+                <p>Total revenue: <strong>${Math.round(stats[1][1]*100)/100}</strong></p>
+                <p>Total tip amount: <strong>${Math.round(stats[2][1]*100)/100}</strong></p>
+                <p>Average Distance: <strong>{Math.round(stats[3][1]*100)/100}mi</strong></p>
             </div>}
         </div>
     )
